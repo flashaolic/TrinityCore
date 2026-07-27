@@ -860,6 +860,11 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
     private:
         std::vector<Vignettes::VignetteData*> _infiniteAOIVignettes;
         PeriodicTimer _vignetteUpdateTimer;
+
+        // Reusable scratchpad containers for temporary use in Map::Update to reduce heap churn.
+        // Do not use for persistent state.
+        std::vector<Unit*> _unitsToVisit;
+        std::unordered_set<Unit*> _unitsToVisitSet;
 };
 
 enum class InstanceResetMethod : uint8
