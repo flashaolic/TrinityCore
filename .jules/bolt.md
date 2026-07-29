@@ -1,0 +1,3 @@
+## 2026-07-16 - Map::Update heap allocation reduction
+**Learning:** In TrinityCore's Map::Update, active unit/pet/summon visitation allocates temporary std::vector and std::unordered_set on every tick (hot path). Since each Map instance is updated sequentially on a single thread at a time by the MapUpdater, we can safely introduce private, reusable member variables as scratchpad containers on the Map object to eliminate these heap allocations completely.
+**Action:** Declare `_unitsToVisit` (std::vector<Unit*>) and `_unitsToVisitSet` (std::unordered_set<Unit*>) in `Map.h`, clear them at the start of use, and use them in place of the local heap-allocated structures in `Map::Update`.
