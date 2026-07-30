@@ -44,6 +44,7 @@
 #include <memory>
 #include <set>
 #include <unordered_set>
+#include <vector>
 
 class BaseEntity;
 class Battleground;
@@ -860,6 +861,12 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
     private:
         std::vector<Vignettes::VignetteData*> _infiniteAOIVignettes;
         PeriodicTimer _vignetteUpdateTimer;
+
+        // Reusable scratchpad containers for temporary use in Map::Update to prevent heap churn.
+        // These are not persistent state and must be cleared before/after use.
+        // Updated sequentially per Map instance, so no thread synchronization is required.
+        std::vector<Unit*> _unitsToVisit;
+        std::unordered_set<Unit*> _unitsToVisitSet;
 };
 
 enum class InstanceResetMethod : uint8
