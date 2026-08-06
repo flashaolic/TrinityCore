@@ -58,6 +58,13 @@ std::vector<std::string_view> Trinity::Tokenize(std::string_view str, char sep, 
 {
     std::vector<std::string_view> tokens;
 
+    // Optimization: Pre-count separators to reserve capacity
+    // This reduces the number of reallocations as the vector grows.
+    if (size_t sepCount = std::count(str.begin(), str.end(), sep); sepCount > 0 || keepEmpty)
+    {
+        tokens.reserve(sepCount + 1);
+    }
+
     size_t start = 0;
     for (size_t end = str.find(sep); end != std::string_view::npos; end = str.find(sep, start))
     {
