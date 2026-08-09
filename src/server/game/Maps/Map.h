@@ -826,6 +826,11 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
 
         std::unordered_set<BaseEntity*> _updateObjects;
 
+        // Scratchpad containers for Map::Update, reused to reduce heap churn.
+        // Each Map is updated by a single thread at a time via MapUpdater.
+        std::vector<Unit*> _unitsToVisit;
+        std::unordered_set<Unit*> _unitsToVisitSet;
+
         MPSCQueue<FarSpellCallback> _farSpellCallbacks;
 
         /*********************************************************/
