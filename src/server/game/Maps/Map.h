@@ -44,6 +44,7 @@
 #include <memory>
 #include <set>
 #include <unordered_set>
+#include <vector>
 
 class BaseEntity;
 class Battleground;
@@ -698,6 +699,11 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
         std::set<WorldObject*> i_objectsToRemove;
         std::map<WorldObject*, bool> i_objectsToSwitch;
         std::set<WorldObject*> i_worldObjects;
+
+        // Scratchpad containers for Map::Update to reduce heap churn.
+        // These are thread-safe for this purpose because each Map instance is updated sequentially by MapUpdater.
+        std::vector<Unit*> _unitsToVisit;
+        std::unordered_set<Unit*> _unitsToVisitSet;
 
         typedef std::multimap<time_t, ScriptAction> ScriptScheduleMap;
         ScriptScheduleMap m_scriptSchedule;
