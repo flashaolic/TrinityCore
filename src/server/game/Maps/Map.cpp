@@ -711,38 +711,41 @@ void Map::Update(uint32 t_diff)
         // Handle updates for creatures in combat with player and are more than 60 yards away
         if (player->IsInCombat())
         {
-            std::vector<Unit*> toVisit;
+            // Use pre-allocated member container to avoid heap allocation churn in hot path
+            _unitsToVisit.clear();
             for (auto const& pair : player->GetCombatManager().GetPvECombatRefs())
                 if (Creature* unit = pair.second->GetOther(player)->ToCreature())
                     if (unit->GetMapId() == player->GetMapId() && !unit->IsWithinDistInMap(player, GetVisibilityRange(), false))
-                        toVisit.push_back(unit);
-            for (Unit* unit : toVisit)
+                        _unitsToVisit.push_back(unit);
+            for (Unit* unit : _unitsToVisit)
                 VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
         }
 
         { // Update any creatures that own auras the player has applications of
-            std::unordered_set<Unit*> toVisit;
+            // Use pre-allocated member container to avoid heap allocation churn in hot path
+            _unitsToVisitSet.clear();
             for (std::pair<uint32, AuraApplication*> pair : player->GetAppliedAuras())
             {
                 if (Unit* caster = pair.second->GetBase()->GetCaster())
                     if (caster->GetTypeId() != TYPEID_PLAYER && !caster->IsWithinDistInMap(player, GetVisibilityRange(), false))
-                        toVisit.insert(caster);
+                        _unitsToVisitSet.insert(caster);
             }
-            for (Unit* unit : toVisit)
+            for (Unit* unit : _unitsToVisitSet)
                 VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
         }
 
         { // Update player's summons
-            std::vector<Unit*> toVisit;
+            // Use pre-allocated member container to avoid heap allocation churn in hot path
+            _unitsToVisit.clear();
 
             // Totems
             for (ObjectGuid const& summonGuid : player->m_SummonSlot)
                 if (!summonGuid.IsEmpty())
                     if (Creature* unit = GetCreature(summonGuid))
                         if (unit->GetMapId() == player->GetMapId() && !unit->IsWithinDistInMap(player, GetVisibilityRange(), false))
-                            toVisit.push_back(unit);
+                            _unitsToVisit.push_back(unit);
 
-            for (Unit* unit : toVisit)
+            for (Unit* unit : _unitsToVisit)
                 VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
         }
     }
@@ -823,6 +826,10 @@ void Map::Update(uint32 t_diff)
     TC_METRIC_VALUE("map_gameobjects", uint64(GetObjectsStore().Size<GameObject>()),
         TC_METRIC_TAG("map_id", std::to_string(GetId())),
         TC_METRIC_TAG("map_instanceid", std::to_string(GetInstanceId())));
+
+    // Clear scratchpad containers at the end of the update to free memory references and prevent holding dangling pointers
+    _unitsToVisit.clear();
+    _unitsToVisitSet.clear();
 }
 
 struct ResetNotifier
