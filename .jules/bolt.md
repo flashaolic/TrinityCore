@@ -1,0 +1,3 @@
+## 2026-06-30 - Reducing heap churn in hot path Map::Update
+**Learning:** High-frequency hot paths (like Map::Update) that iterate over many players/objects are prime candidates for reducing heap churn. Replacing local std::vector/std::set with class member scratchpads avoids thousands of allocations per second. In TrinityCore's architecture, Map updates are sequential per instance, making it safe to use member variables as temporary storage without additional locks.
+**Action:** Identify hot path loops that instantiate local containers and refactor them to use class members with clear() to reuse allocated capacity.
