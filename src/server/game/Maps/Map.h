@@ -828,6 +828,11 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
 
         MPSCQueue<FarSpellCallback> _farSpellCallbacks;
 
+        // Scratchpads for Map::Update to reduce heap churn
+        // These are safe to use without synchronization because each Map is updated by only one thread at a time.
+        std::vector<Unit*> _unitsToVisit;
+        std::unordered_set<Unit*> _unitsToVisitSet;
+
         /*********************************************************/
         /***                   Phasing                         ***/
         /*********************************************************/
