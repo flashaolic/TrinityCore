@@ -44,6 +44,7 @@
 #include <memory>
 #include <set>
 #include <unordered_set>
+#include <vector>
 
 class BaseEntity;
 class Battleground;
@@ -827,6 +828,10 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
         std::unordered_set<BaseEntity*> _updateObjects;
 
         MPSCQueue<FarSpellCallback> _farSpellCallbacks;
+
+        // Reusable scratchpad containers for Map::Update to avoid frequent heap allocations
+        std::vector<Unit*> _unitsToVisit;
+        std::unordered_set<Unit*> _unitsToVisitSet;
 
         /*********************************************************/
         /***                   Phasing                         ***/

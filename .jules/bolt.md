@@ -1,0 +1,3 @@
+## 2026-07-08 - Reusable scratchpads in Map::Update
+**Learning:** In TrinityCore-based architectures, each Map instance is updated sequentially by a single thread at a time (MapUpdater). This allows for the use of Map member variables as scratchpad containers (e.g., for unit visitation) without requiring thread synchronization, significantly reducing heap churn in the game loop's hottest path.
+**Action:** When optimizing hot loops in the game engine, look for opportunities to promote temporary containers to member variables to reuse capacity, provided the object's update cycle is guaranteed to be single-threaded.
