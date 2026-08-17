@@ -828,6 +828,10 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
 
         MPSCQueue<FarSpellCallback> _farSpellCallbacks;
 
+        // Scratchpad containers for Map::Update to avoid repeated heap allocations during player update iterations
+        std::vector<Unit*> _unitsToVisit;
+        std::unordered_set<Unit*> _unitsToVisitSet;
+
         /*********************************************************/
         /***                   Phasing                         ***/
         /*********************************************************/
