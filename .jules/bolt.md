@@ -1,0 +1,3 @@
+## 2026-07-16 - Sequential Map Updates and Scratchpad Reuse in Hot Loops
+**Learning:** In TrinityCore, each `Map` instance is updated sequentially on a dedicated map update thread. Local `std::vector` and `std::unordered_set` instances created inside per-player loops during `Map::Update` trigger continuous heap allocations/deallocations (`malloc`/`free`) every server tick.
+**Action:** Promote local temporary containers used in sequential hot paths like `Map::Update` to `Map` class member scratchpads and call `.clear()` between uses. This preserves internal allocated vector capacity and eliminates per-tick heap churn.
