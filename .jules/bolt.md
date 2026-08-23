@@ -1,0 +1,3 @@
+## 2026-08-23 - Container Reusability in Map Update Loop
+**Learning:** Reusing `std::vector` across iterations preserves allocated internal buffer capacity when `.clear()` is called, completely eliminating reallocations in hot loops. However, `std::unordered_set::clear()` deallocates hash node allocations upon clearance, so reusing an `unordered_set` scratchpad does not eliminate dynamic node allocations on insert.
+**Action:** When creating scratchpad containers for hot loops, prefer array/contiguous vector containers with `.clear()` over node-based containers like `std::unordered_set` or `std::map`.
