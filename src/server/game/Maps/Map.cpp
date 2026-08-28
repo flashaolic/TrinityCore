@@ -721,12 +721,15 @@ void Map::Update(uint32 t_diff)
         }
 
         { // Update any creatures that own auras the player has applications of
-            std::unordered_set<Unit*> toVisit;
+            // Optimization: Use std::vector instead of std::unordered_set to avoid dynamic heap node allocations on every iteration.
+            // Players typically have a small number of distinct aura casters (< 10), making linear vector search faster and allocation-free.
+            std::vector<Unit*> toVisit;
             for (std::pair<uint32, AuraApplication*> pair : player->GetAppliedAuras())
             {
                 if (Unit* caster = pair.second->GetBase()->GetCaster())
                     if (caster->GetTypeId() != TYPEID_PLAYER && !caster->IsWithinDistInMap(player, GetVisibilityRange(), false))
-                        toVisit.insert(caster);
+                        if (std::find(toVisit.begin(), toVisit.end(), caster) == toVisit.end())
+                            toVisit.push_back(caster);
             }
             for (Unit* unit : toVisit)
                 VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
