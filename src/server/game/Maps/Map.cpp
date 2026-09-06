@@ -722,9 +722,11 @@ void Map::Update(uint32 t_diff)
 
         { // Update any creatures that own auras the player has applications of
             std::unordered_set<Unit*> toVisit;
-            for (std::pair<uint32, AuraApplication*> pair : player->GetAppliedAuras())
+            // Optimize iteration over player applied auras by using structured binding by const reference.
+            // Avoids creating temporary std::pair<uint32, AuraApplication*> objects and pair value copies on every tick.
+            for (auto const& [_, auraApp] : player->GetAppliedAuras())
             {
-                if (Unit* caster = pair.second->GetBase()->GetCaster())
+                if (Unit* caster = auraApp->GetBase()->GetCaster())
                     if (caster->GetTypeId() != TYPEID_PLAYER && !caster->IsWithinDistInMap(player, GetVisibilityRange(), false))
                         toVisit.insert(caster);
             }
